@@ -12,6 +12,7 @@ zsh tests/smoke.zsh
 ```
 
 - The smoke test uses a disposable HOME and CLI stand-ins; no server is needed. Its Bao-only installation check assumes no system `vault` remains in PATH after the stand-in is removed.
+- Test VE's own code and settings, not underlying Zsh helpers, frameworks or CLIs. Stub those boundaries. Small changes need only a few direct assertions, not test scaffolding substantially larger than the implementation.
 - Completion checks stub `compadd`; they do not verify CLI delegation, interactive Tab behavior or Zsh prefix filtering. Keep tests proportional; VE-002 permits omitting interactive tests needing more than ten lines.
 
 ## Execution Boundaries
@@ -27,6 +28,7 @@ zsh tests/smoke.zsh
 
 - Minimize implementation and test code; prefer native Zsh features. Additional frameworks are allowed when they substantially simplify the implementation. Keep tests proportional to the feature.
 - Write facts, not filler. Omit repetition and unnecessary explanations.
+- Keep assistant responses short and direct. Do not repeat established context or add requirements the user did not request.
 - Keep both READMEs short and aligned: user commands only; implementation/setup details belong in `docs/development.md`.
 - Consult `.opencode/skills/doc-requirements-write/` and `.opencode/skills/doc-adr-write/` for documentation rules/templates. Requirements describe needs; ADRs record technical decisions and reference constraints rather than repeat requirements.
 - Release and commit workflows live in `.opencode/skills/release-*/SKILL.md`; they are local-only and prohibit pushing. Use them when requested, not automatically.
