@@ -6,7 +6,7 @@ state: implemented
 
 ## Context
 
-VE selects a profile's server URL and delegates commands to HashiCorp Vault or OpenBao. The MVP is a small wrapper for Zsh on Ubuntu.
+VE selects a server profile and delegates commands to Vault or OpenBao in Zsh on Ubuntu.
 
 ## Assumptions
 
@@ -83,10 +83,10 @@ VE selects a profile's server URL and delegates commands to HashiCorp Vault or O
 
 ### Shell Integration
 **Type:** Functional
-**Description:** Installation and uninstallation must manage exactly one marked source line in the user's Zsh startup configuration.
+**Description:** Installation and uninstallation must manage one marked setup block in the user's Zsh startup configuration.
 **Acceptance Criteria:**
-- Installation adds or replaces the line; repeated installation leaves exactly one such line.
-- Uninstallation removes the marked line and installed scripts, and preserves profiles, CLI selection and unrelated startup content.
+- Installation adds or replaces the block; repeated installation leaves one setup block with one VE source line.
+- Uninstallation removes the block and installed scripts, preserving profiles, CLI selection and unrelated startup content.
 - `${ZDOTDIR:-$HOME}/.zshrc` is used; no legacy-entry migration is required.
 
 ### Download Installation
@@ -97,3 +97,11 @@ VE selects a profile's server URL and delegates commands to HashiCorp Vault or O
 - Installation from a local checkout with `zsh install.zsh` remains supported.
 - Installed scripts are stored under `${XDG_DATA_HOME:-$HOME/.local/share}/vault-environments`; repeated installation replaces them.
 - A failed script download stops installation before changing installed scripts, configuration or shell integration.
+
+### Implementation Simplicity
+**Type:** Constraint
+**Description:** VE must minimize implementation and test complexity.
+**Acceptance Criteria:**
+- Native Zsh features are preferred.
+- Additional frameworks or dependencies are allowed when they substantially simplify the implementation; the benefit is documented in an ADR.
+- Test scope and setup remain proportional to the feature.

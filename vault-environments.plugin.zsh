@@ -82,3 +82,26 @@ ve() {
   [[ $cli == bao ]] && variable=BAO_ADDR
   (export "$variable=$address"; command "$cli" "$@")
 }
+
+_ve() {
+  emulate -L zsh
+  local directory=${VE_CONFIG_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/vault-environments} cli
+  local -a profiles=("$directory"/profiles/*(N.:t))
+  if (( CURRENT == 2 )); then
+    compadd -- create list show remove help "${profiles[@]}"
+    return
+  fi
+  case ${words[2]} in
+    show|remove) (( CURRENT == 3 )) && compadd -- "${profiles[@]}"; return ;;
+    create|list|help) return 1 ;;
+  esac
+  [[ -r $directory/config ]] && cli=$(< "$directory/config")
+  [[ $cli == (vault|bao) && -n ${_comps[$cli]-} ]] || return 1
+  local -a words=("$cli" "${words[@]:2}")
+  local CURRENT=$(( CURRENT - 1 ))
+  _normal
+}
+
+if (( $+functions[compdef] )); then
+  compdef _ve ve
+fi

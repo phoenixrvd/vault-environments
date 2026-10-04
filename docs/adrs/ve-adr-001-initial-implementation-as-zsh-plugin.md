@@ -4,22 +4,47 @@ state: accepted
 
 # VE-ADR-001: Small Zsh Wrapper
 
+## Status
+
+accepted
+
+## Context
+
+- Constraints: [Profile Storage](../requirements/ve-001-profile-url-wrapper.md#profile-storage), [Implementation Simplicity](../requirements/ve-001-profile-url-wrapper.md#implementation-simplicity).
+- Behavioral boundaries: [Explicit Profile](../requirements/ve-001-profile-url-wrapper.md#explicit-profile), [CLI Delegation](../requirements/ve-001-profile-url-wrapper.md#cli-delegation).
+- Lifecycle: [Shell Integration](../requirements/ve-001-profile-url-wrapper.md#shell-integration), [Download Installation](../requirements/ve-001-profile-url-wrapper.md#download-installation).
+
 ## Decision
 
-Implement [VE-001](../requirements/ve-001-profile-url-wrapper.md) in three files:
+- Implement a sourced Zsh function with shell file operations and subprocess CLI delegation.
+- Keep installation and uninstallation in separate scripts; load the installed plugin, not the checkout.
+- Prefer native Zsh features. Introduce a framework only if it substantially simplifies implementation; document that comparison in an ADR.
 
-- `vault-environments.plugin.zsh`: the `ve` function, trivial profile file operations and CLI delegation.
-- `install.zsh`: copy or download the plugin and uninstaller, then add or replace one marked source line in `.zshrc`.
-- `uninstall.zsh`: remove that line and the installed scripts.
+## Rationale
 
-A profile file contains only its URL; a separate file contains the global CLI choice. Invocation reads these values, sets the CLI's address variable in a subprocess and forwards the original arguments.
+- Zsh provides file reads, non-overwriting writes and subprocess environment isolation.
+- These operations need no framework in the current implementation.
 
-Configuration lives in `${VE_CONFIG_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/vault-environments}`: `profiles/<name>` holds the URL and `config` holds `vault` or `bao`. Installation selects an available CLI from `PATH`, preferring `vault` when both exist, or asks the user to install one if neither exists. Profile creation uses a non-overwriting file write; configuration is read as data.
+## Alternatives
 
-Installed scripts live in `${XDG_DATA_HOME:-$HOME/.local/share}/vault-environments`. Local installation copies them from the checkout. A piped installer downloads them from `phoenixrvd/vault-environments` on branch `main` to a temporary directory before installing. The source line points to the installed copy, so the checkout is not needed afterward.
+### Framework-Based Wrapper
 
-## Rationale and Consequences
+- Not selected: native Zsh handles the current scope. Allowed if the simplification outweighs integration complexity.
 
-This directly supports the requested Zsh workflow with a single source line. No module framework, session state, token handling or command parsing is needed. Authentication and other native behavior remain with Vault/OpenBao. The wrapper must be loaded in Zsh to use `ve`.
+## Consequences
 
-This decision replaces the previous shell-session-based design and its VE-002 requirements.
+- positive: No runtime dependency on the repository checkout.
+- negative: `ve` requires the plugin to be sourced in Zsh.
+
+## Assumptions
+
+- None
+
+## Open Questions
+
+- None
+
+## References
+
+- [VE-001: Profile URL Wrapper](../requirements/ve-001-profile-url-wrapper.md)
+- [VE-ADR-002: Native Zsh Completion](ve-adr-002-use-native-zsh-completion.md)

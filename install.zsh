@@ -56,7 +56,10 @@ command sed \
 [[ ! -s $startup || -z $(command tail -c 1 -- "$startup") ]] ||
   print >> "$startup"
 
-print -r -- "source ${(q)plugin} # vault-environments" \
+print -rl -- \
+  '(( $+functions[compdef] )) || { autoload -Uz compinit; compinit; } # vault-environments' \
+  "if [[ -z \${_comps[$cli]-} ]]; then autoload -Uz bashcompinit; bashcompinit; complete -o nospace -C $cli $cli; fi # vault-environments" \
+  "source ${(q)plugin} # vault-environments" \
   >> "$startup" || exit 1
 
 print -r -- \

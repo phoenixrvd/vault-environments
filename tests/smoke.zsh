@@ -38,6 +38,18 @@ if ve create dev <<< 'https://other.example'; then exit 1; fi
 if ve missing status; then exit 1; fi
 if ve ../dev status; then exit 1; fi
 
+# Completion registration and profile candidates, without an interactive shell.
+(
+  autoload -Uz compinit; compinit -D
+  source "$project/vault-environments.plugin.zsh"
+  [[ $_comps[ve] == _ve ]]
+  compadd() { shift; print -rl -- "$@"; }
+  CURRENT=2 words=(ve '')
+  [[ $(_ve) == $'create\nlist\nshow\nremove\nhelp\ndev' ]]
+  CURRENT=3 words=(ve show '')
+  [[ $(_ve) == dev ]]
+)
+
 # Both CLIs receive the profile URL and unchanged arguments and input.
 export VAULT_ADDR=old-vault BAO_ADDR=old-bao
 for cli in vault bao; do
@@ -50,15 +62,20 @@ for cli in vault bao; do
   [[ $code == 7 ]]
 done
 
-# Reinstallation keeps one source line; uninstall keeps profiles and config.
+# Reinstallation keeps one setup block; uninstall keeps profiles and config.
 print -r -- '# keep' > "$HOME/.zshrc"
 zsh "$project/install.zsh"
 zsh "$project/install.zsh"
-[[ $(grep -c ' # vault-environments$' "$HOME/.zshrc") == 1 ]]
+[[ $(grep -c ' # vault-environments$' "$HOME/.zshrc") == 3 ]]
 cmp "$project/vault-environments.plugin.zsh" "$installation/vault-environments.plugin.zsh"
 unfunction ve
 source "$HOME/.zshrc"
+[[ $_comps[ve] == _ve && $_comps[vault] == *'-C vault'* ]]
 [[ $(ve dev status </dev/null) == $'https://dev.example\n<status>' ]]
+mv "$HOME/bin/vault" "$HOME/vault"
+zsh "$project/install.zsh"
+source "$HOME/.zshrc"
+[[ $_comps[bao] == *'-C bao'* ]]
 zsh "$installation/uninstall.zsh"
 [[ $(< "$HOME/.zshrc") == '# keep' ]]
 [[ ! -e $installation/vault-environments.plugin.zsh && ! -e $installation/uninstall.zsh ]]
